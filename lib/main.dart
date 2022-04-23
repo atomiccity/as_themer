@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:as_themer/automation_studio/as_config.dart';
+import 'package:as_themer/automation_studio/code_themer_c.dart';
+import 'package:as_themer/automation_studio/editor_theme.dart';
+import 'package:as_themer/ui/code_preview_c.dart';
 import 'package:as_themer/ui/version_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:window_manager/window_manager.dart';
@@ -43,9 +48,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with WindowListener {
+  EditorTheme theme = EditorTheme();
+  late CodeThemerC themer;
+
   @override
   void initState() {
     windowManager.addListener(this);
+    themer = CodeThemerC(theme: theme);
     super.initState();
   }
 
@@ -86,15 +95,19 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                   icon: const Icon(FluentIcons.open_file),
                   label: const Text('Load'),
                   onPressed: () async {
-                    var theme = await showDialog<AutomationStudioConfig?>(
+                    var config = await showDialog<AutomationStudioConfig?>(
                         context: context,
                         builder: (context) {
                           return SelectVersionDialog(configs: widget.configs);
                         }
                     );
-                    setState(() {
-
-                    });
+                    if (config != null) {
+                      setState(() {
+                        theme = EditorTheme.fromEditorSet(
+                            File(config.editorSetPath));
+                        themer = CodeThemerC(theme: theme);
+                      });
+                    }
                   }
               ),
               CommandBarButton(
@@ -106,6 +119,11 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
               ),
             ],
           ),
+          Column(
+            children: [
+              CodePreviewC(theme: theme, themer: themer)
+            ],
+          )
         ],
       ),
     );

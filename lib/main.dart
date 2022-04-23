@@ -4,6 +4,7 @@ import 'package:as_themer/automation_studio/as_config.dart';
 import 'package:as_themer/automation_studio/code_themer_c.dart';
 import 'package:as_themer/automation_studio/editor_theme.dart';
 import 'package:as_themer/ui/code_preview_c.dart';
+import 'package:as_themer/ui/color_selector.dart';
 import 'package:as_themer/ui/version_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:window_manager/window_manager.dart';
@@ -119,9 +120,113 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
               ),
             ],
           ),
-          Column(
+          Row(
             children: [
-              CodePreviewC(theme: theme, themer: themer)
+              CodePreviewC(theme: theme, themer: themer),
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ColorSelector(
+                    name: 'Background',
+                    color: theme.defaultBackground,
+                    onColorChanged: (color) {
+                      setState(() {
+                        theme.defaultBackground = color;
+                      });
+                    }
+                  ),
+                  ColorSelector(
+                      name: 'Monitor\nBackground',
+                      color: theme.monitorBackground,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.monitorBackground = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Keyword',
+                      color: theme.keyword,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.keyword = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'String',
+                      color: theme.string,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.string = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Number',
+                      color: theme.number,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.number = color;
+                        });
+                      }
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ColorSelector(
+                      name: 'Data Types',
+                      color: theme.dataType,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.dataType = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Names',
+                      color: theme.name,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.name = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Comments',
+                      color: theme.remark,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.remark = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Operator',
+                      color: theme.operator,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.operator = color;
+                        });
+                      }
+                  ),
+                  ColorSelector(
+                      name: 'Header File',
+                      color: theme.includeFiles,
+                      onColorChanged: (color) {
+                        setState(() {
+                          theme.includeFiles = color;
+                        });
+                      }
+                  ),
+                ],
+              )
             ],
           )
         ],

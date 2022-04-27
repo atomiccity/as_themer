@@ -24,32 +24,50 @@ int main() {
     return length;
 }''';
 
-class CodePreviewC extends ConsumerWidget {
+class CodePreviewC extends ConsumerStatefulWidget {
   const CodePreviewC({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConsumerStatefulWidget> createState() => _CodePreviewCState();
+}
+
+class _CodePreviewCState extends ConsumerState<CodePreviewC> {
+  bool isMonitorMode = false;
+
+  @override
+  Widget build(BuildContext context) {
     var theme = ref.watch(themeProvider);
     var themer = CodeThemerC(theme: theme);
-    return Container(
-        color: theme.backgroundColor, // isMonitorMode ? widget.theme.monitorBackground : widget.theme.defaultBackground,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Padding(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Checkbox(
+            content: const Text('Monitor Mode'),
+            checked: isMonitorMode,
+            onChanged: (checked) {
+              if (checked != null) {
+                setState(() {
+                  isMonitorMode = checked;
+                });
+              }
+            }
+        ),
+        Container(
+            color: isMonitorMode ? theme.monitorBackgroundColor : theme.backgroundColor,
+            child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: RichText(
                   text: TextSpan(
                       style: TextStyle(
-                        fontFamily: theme.font,
+                        fontFamily: 'Consolas', // theme.font,
                         fontSize: 14,
                       ),
-                      children: themer.themeSourceCode(sourceCode)
+                      children: themer.themeSourceCode(sourceCode, monitorMode: isMonitorMode)
                   ),
                 )
             )
-          ],
-        )
+        ),
+      ],
     );
   }
 }

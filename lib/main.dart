@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:as_themer/automation_studio/as_config.dart';
 import 'package:as_themer/automation_studio/code_themer_c.dart';
 import 'package:as_themer/automation_studio/editor_theme.dart';
+import 'package:as_themer/providers.dart';
 import 'package:as_themer/ui/code_preview_c.dart';
 import 'package:as_themer/ui/color_selector.dart';
 import 'package:as_themer/ui/version_dialog.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
@@ -19,7 +21,7 @@ void main() async {
   });
 
   var configs = await AutomationStudioConfig.findAutomationStudioVersions();
-  runApp(MyApp(configs: configs));
+  runApp(ProviderScope(child: MyApp(configs: configs)));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,24 +40,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   final List<AutomationStudioConfig> configs;
   const MyHomePage({Key? key, required this.title, required this.configs}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WindowListener {
-  EditorTheme theme = EditorTheme();
-  late CodeThemerC themer;
+class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
+  String? predefinedTheme;
 
   @override
   void initState() {
     windowManager.addListener(this);
-    themer = CodeThemerC(theme: theme);
     super.initState();
   }
 
@@ -67,6 +67,8 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    var theme = ref.watch(themeProvider);
+    var themer = CodeThemerC(theme: theme);
     return NavigationView(
       appBar: NavigationAppBar(
           title: DragToMoveArea(
@@ -104,9 +106,9 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
                     );
                     if (config != null) {
                       setState(() {
-                        theme = EditorTheme.fromEditorSet(
-                            File(config.editorSetPath));
-                        themer = CodeThemerC(theme: theme);
+                        var theme = EditorThemeUtils.fromEditorSet(File(config.editorSetPath));
+                        ref.read(themeProvider.notifier).setTheme(theme);
+                        //themer = CodeThemerC(theme: theme);
                       });
                     }
                   }
@@ -122,111 +124,114 @@ class _MyHomePageState extends State<MyHomePage> with WindowListener {
           ),
           Row(
             children: [
-              CodePreviewC(theme: theme, themer: themer),
+              const CodePreviewC(),
               Column(
                 mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  ColorSelector(
-                    name: 'Background',
-                    color: theme.defaultBackground,
-                    onColorChanged: (color) {
-                      setState(() {
-                        theme.defaultBackground = color;
-                      });
-                    }
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Combobox<String>(
+                      placeholder: const Text('Presets         '),
+                      isExpanded: false,
+                      items: PredefinedTheme.themes.keys.map((e) => ComboboxItem<String>(value: e, child: Text(e))).toList(),
+                      value: predefinedTheme,
+                      onChanged: (value) {
+                        if (value != null) {
+                          ref.read(themeProvider.notifier).setTheme(PredefinedTheme.themes[value]!);
+                        }
+                      },
+                    ),
                   ),
-                  ColorSelector(
-                      name: 'Monitor\nBackground',
-                      color: theme.monitorBackground,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.monitorBackground = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Keyword',
-                      color: theme.keyword,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.keyword = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'String',
-                      color: theme.string,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.string = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Number',
-                      color: theme.number,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.number = color;
-                        });
-                      }
+                  Row(
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ColorSelector(
+                              name: 'Background',
+                              color: theme.backgroundColor,
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setBackground(color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Monitor\nBackground',
+                              color: theme.monitorBackgroundColor,
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setMonitorBackground(color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Keyword',
+                              color: theme.getColor(EditorComponent.keyword),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.keyword, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'String',
+                              color: theme.getColor(EditorComponent.string),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.string, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Number',
+                              color: theme.getColor(EditorComponent.number),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.number, color);
+                              }
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          ColorSelector(
+                              name: 'Data Types',
+                              color: theme.getColor(EditorComponent.dataType),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.dataType, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Names',
+                              color: theme.getColor(EditorComponent.name),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.name, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Comments',
+                              color: theme.getColor(EditorComponent.remark),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.remark, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Operator',
+                              color: theme.getColor(EditorComponent.operator),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.operator, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Header File',
+                              color: theme.getColor(EditorComponent.includeFiles),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.includeFiles, color);
+                              }
+                          ),
+                        ],
+                      )
+                    ],
                   ),
                 ],
               ),
-              Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ColorSelector(
-                      name: 'Data Types',
-                      color: theme.dataType,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.dataType = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Names',
-                      color: theme.name,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.name = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Comments',
-                      color: theme.remark,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.remark = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Operator',
-                      color: theme.operator,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.operator = color;
-                        });
-                      }
-                  ),
-                  ColorSelector(
-                      name: 'Header File',
-                      color: theme.includeFiles,
-                      onColorChanged: (color) {
-                        setState(() {
-                          theme.includeFiles = color;
-                        });
-                      }
-                  ),
-                ],
-              )
             ],
           )
         ],

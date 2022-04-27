@@ -1,6 +1,8 @@
 import 'package:as_themer/automation_studio/code_themer_c.dart';
 import 'package:as_themer/automation_studio/editor_theme.dart';
+import 'package:as_themer/providers.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 String sourceCode = '''
 #include <bur/plctypes.h>
@@ -22,57 +24,32 @@ int main() {
     return length;
 }''';
 
-class CodePreviewC extends StatefulWidget {
-  final EditorTheme theme;
-  final CodeThemerC themer;
-
-  const CodePreviewC({Key? key, required this.theme, required this.themer}) : super(key: key);
+class CodePreviewC extends ConsumerWidget {
+  const CodePreviewC({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _CodePreviewCState();
-}
-
-class _CodePreviewCState extends State<CodePreviewC> {
-  var isMonitorMode = false;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    var theme = ref.watch(themeProvider);
+    var themer = CodeThemerC(theme: theme);
     return Container(
-      color: isMonitorMode ? widget.theme.monitorBackground : widget.theme.defaultBackground,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Checkbox(
-              content: const Text('Monitor Mode'),
-              checked: isMonitorMode,
-              onChanged: (checked) {
-                setState(() {
-                  isMonitorMode = checked ?? false;
-                });
-              },
+        color: theme.backgroundColor, // isMonitorMode ? widget.theme.monitorBackground : widget.theme.defaultBackground,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RichText(
+                  text: TextSpan(
+                      style: TextStyle(
+                        fontFamily: theme.font,
+                        fontSize: 14,
+                      ),
+                      children: themer.themeSourceCode(sourceCode)
+                  ),
+                )
             )
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontFamily: widget.theme.fontName,
-                  fontSize: 14,
-                ),
-                children: widget.themer.themeSourceCode(sourceCode, monitorMode: isMonitorMode)
-              ),
-            )
-          )
-        ],
-      )
+          ],
+        )
     );
   }
 }

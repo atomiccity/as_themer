@@ -32,6 +32,12 @@ class ColorSelector extends StatelessWidget {
                 pickersEnabled: { ColorPickerType.wheel: true, ColorPickerType.primary: false, ColorPickerType.accent: false },
                 showColorCode: true,
                 colorCodeReadOnly: false,
+                actionButtons: const ColorPickerActionButtons(
+                  dialogOkButtonType: ColorPickerActionButtonType.fluent,
+                  dialogOkButtonLabel: 'Ok',
+                  dialogCancelButtonType: ColorPickerActionButtonType.fluent,
+                  dialogCancelButtonLabel: 'Cancel',
+                ),
               );
               onColorChanged(newColor);
             },

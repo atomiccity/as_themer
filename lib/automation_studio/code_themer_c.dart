@@ -8,13 +8,13 @@ class CodeThemerC {
 
   List<TextSpan> themeSourceCode(String code, {bool monitorMode = false}) {
     var spans = List<TextSpan>.empty(growable: true);
-    var background = monitorMode ? theme.monitorBackground : theme.defaultBackground;
+    var background = monitorMode ? theme.monitorBackgroundColor : theme.backgroundColor;
 
     for (var line in code.split('\n')) {
       if (line.startsWith('#include')) {
-        spans.add(TextSpan(text: '#include', style: TextStyle(backgroundColor: background, color: theme.keyword)));
+        spans.add(TextSpan(text: '#include', style: TextStyle(backgroundColor: background, color: theme.getColor(EditorComponent.keyword))));
         var includeFile = line.substring('#include'.length);
-        spans.add(TextSpan(text: includeFile, style: TextStyle(backgroundColor: background, color: theme.includeFiles)));
+        spans.add(TextSpan(text: includeFile, style: TextStyle(backgroundColor: background, color: theme.getColor(EditorComponent.includeFiles))));
       } else {
         var tokens = _readTokens(line);
 
@@ -26,7 +26,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.name,
+                      color: theme.getColor(EditorComponent.name),
                       backgroundColor: background,
                     )
                 )
@@ -39,7 +39,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.dataType,
+                      color: theme.getColor(EditorComponent.dataType),
                       backgroundColor: background,
                     )
                 )
@@ -49,7 +49,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.keyword,
+                      color: theme.getColor(EditorComponent.keyword),
                       backgroundColor: background,
                     )
                 )
@@ -59,7 +59,7 @@ class CodeThemerC {
               TextSpan(
                 text: t,
                 style: TextStyle(
-                  color: theme.operator,
+                  color: theme.getColor(EditorComponent.operator),
                   backgroundColor: background,
                 )
               )
@@ -69,7 +69,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.string,
+                      color: theme.getColor(EditorComponent.string),
                       backgroundColor: background,
                     )
                 )
@@ -79,7 +79,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.remark,
+                      color: theme.getColor(EditorComponent.remark),
                       backgroundColor: background,
                     )
                 )
@@ -89,7 +89,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.number,
+                      color: theme.getColor(EditorComponent.number),
                       backgroundColor: background,
                     )
                 )
@@ -99,7 +99,7 @@ class CodeThemerC {
                 TextSpan(
                     text: t,
                     style: TextStyle(
-                      color: theme.name,
+                      color: theme.getColor(EditorComponent.name),
                       backgroundColor: background,
                     )
                 )

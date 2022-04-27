@@ -31,7 +31,7 @@ class EditorTheme {
   static const Color defaultBackgroundColor = Color.fromARGB(255, 255, 255, 255);
   static const Color defaultSelectedBackgroundColor = Color.fromARGB(255, 0, 0, 255);
   static const Color defaultMonitorBackgroundColor = Color.fromARGB(255, 200, 200, 200);
-  static const String defaultFont = 'Courier';
+  static const String defaultFont = 'Courier New';
   final Color foregroundColor;
   final Color backgroundColor;
   final Color selectedBackgroundColor;

@@ -108,7 +108,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                       setState(() {
                         var theme = EditorThemeUtils.fromEditorSet(File(config.editorSetPath));
                         ref.read(themeProvider.notifier).setTheme(theme);
-                        //themer = CodeThemerC(theme: theme);
                       });
                     }
                   }
@@ -116,8 +115,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
               CommandBarButton(
                   icon: const Icon(FluentIcons.save),
                   label: const Text('Save'),
-                  onPressed: () {
-
+                  onPressed: () async {
+                    var config = await showDialog<AutomationStudioConfig?>(
+                        context: context,
+                        builder: (context) {
+                          return SelectVersionDialog(configs: widget.configs);
+                        }
+                    );
+                    if (config != null) {
+                      var theme = ref.read(themeProvider);
+                      EditorThemeUtils.toEditorSet(theme, File(config.editorSetPath));
+                    }
                   }
               ),
             ],
@@ -137,6 +145,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                       value: predefinedTheme,
                       onChanged: (value) {
                         if (value != null) {
+                          predefinedTheme = value;
                           ref.read(themeProvider.notifier).setTheme(PredefinedTheme.themes[value]!);
                         }
                       },
@@ -157,10 +166,24 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                               }
                           ),
                           ColorSelector(
+                              name: 'Selected\nBackground',
+                              color: theme.selectedBackgroundColor,
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setSelectedBackground(color);
+                              }
+                          ),
+                          ColorSelector(
                               name: 'Monitor\nBackground',
                               color: theme.monitorBackgroundColor,
                               onColorChanged: (color) {
                                 ref.read(themeProvider.notifier).setMonitorBackground(color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Names',
+                              color: theme.getColor(EditorComponent.name),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.name, color);
                               }
                           ),
                           ColorSelector(
@@ -170,6 +193,20 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                                 ref.read(themeProvider.notifier).setColor(EditorComponent.keyword, color);
                               }
                           ),
+                          ColorSelector(
+                              name: 'Data Types',
+                              color: theme.getColor(EditorComponent.dataType),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.dataType, color);
+                              }
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
                           ColorSelector(
                               name: 'String',
                               color: theme.getColor(EditorComponent.string),
@@ -182,27 +219,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                               color: theme.getColor(EditorComponent.number),
                               onColorChanged: (color) {
                                 ref.read(themeProvider.notifier).setColor(EditorComponent.number, color);
-                              }
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          ColorSelector(
-                              name: 'Data Types',
-                              color: theme.getColor(EditorComponent.dataType),
-                              onColorChanged: (color) {
-                                ref.read(themeProvider.notifier).setColor(EditorComponent.dataType, color);
-                              }
-                          ),
-                          ColorSelector(
-                              name: 'Names',
-                              color: theme.getColor(EditorComponent.name),
-                              onColorChanged: (color) {
-                                ref.read(themeProvider.notifier).setColor(EditorComponent.name, color);
                               }
                           ),
                           ColorSelector(
@@ -224,6 +240,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WindowListener {
                               color: theme.getColor(EditorComponent.includeFiles),
                               onColorChanged: (color) {
                                 ref.read(themeProvider.notifier).setColor(EditorComponent.includeFiles, color);
+                              }
+                          ),
+                          ColorSelector(
+                              name: 'Braces\nHighlight',
+                              color: theme.getColor(EditorComponent.bracesHighlight),
+                              onColorChanged: (color) {
+                                ref.read(themeProvider.notifier).setColor(EditorComponent.bracesHighlight, color);
                               }
                           ),
                         ],

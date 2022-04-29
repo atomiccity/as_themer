@@ -247,17 +247,34 @@ class EditorThemeUtils {
             (element) => (element.getAttribute('Name') == 'TextEditor')
     );
 
-    // TODO: Need to add background/monitor/selection/font if they don't already exist
+    // For some reason, Automation Studio needs Back/Monitor/Selection colors
+    // before the other colors in the XML file.  We'll set these first and
+    // use insert() with index 0 to accomplish this.
+    var selectColorElement = textEditorNode.getElement('SelectionBackColor');
+    if (selectColorElement == null) {
+      selectColorElement = XmlElement(XmlName('SelectionBackColor'));
+      textEditorNode.children.insert(0, selectColorElement);
+    }
+    setColor(selectColorElement, theme.selectedBackgroundColor);
+
+    var monitorColorElement = textEditorNode.getElement('MonitorBackColor');
+    if (monitorColorElement == null) {
+      monitorColorElement = XmlElement(XmlName('MonitorBackColor'));
+      textEditorNode.children.insert(0, monitorColorElement);
+    }
+    setColor(monitorColorElement, theme.monitorBackgroundColor);
+
+    var backColorElement = textEditorNode.getElement('BackColor');
+    if (backColorElement == null) {
+      backColorElement = XmlElement(XmlName('BackColor'));
+      textEditorNode.children.insert(0, backColorElement);
+    }
+    setColor(backColorElement, theme.backgroundColor);
+
     for (var child in textEditorNode.children) {
       if (child is XmlElement) {
         if (child.name.local == 'Font') {
           child.setAttribute('Name', theme.font);
-        } else if (child.name.local == 'BackColor') {
-          setColor(child, theme.backgroundColor);
-        } else if (child.name.local == 'MonitorBackColor') {
-          setColor(child, theme.monitorBackgroundColor);
-        } else if (child.name.local == 'SelectionBackColor') {
-          setColor(child, theme.selectedBackgroundColor);
         } else if (child.name.local == 'Items') {
           for (var item in child.children) {
             if (item is XmlElement && item.name.local == 'Item') {
